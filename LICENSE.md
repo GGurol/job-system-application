@@ -1,6 +1,6 @@
 # Family Use License
 
-Copyright (c) 2025 [Your Name]
+Copyright (c) 2025 Bartosz
 
 Permission is hereby granted to the copyright holder and their immediate family
 members to use, copy, and modify this software for personal and non-commercial
