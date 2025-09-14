@@ -31,9 +31,8 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <button onClick={() => { localStorage.removeItem('token'); window.dispatchEvent(new Event('authStateChange')); window.location.href = '/login'; }} className="px-3 py-1.5 text-sm bg-gray-200 rounded">Logout</button>
       </div>
       {loading && <p>Loading...</p>}
       {error && <p className="text-red-600">{error}</p>}

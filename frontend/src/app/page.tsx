@@ -21,29 +21,19 @@ async function getPublicJobs(): Promise<{ id: number; title: string; company: st
 }
 
 import PublicJobs from '../components/PublicJobs';
+import HeroSection from '../components/HeroSection';
 
 export default async function Home() {
   const [health] = await Promise.all([getHealth()]);
   const isOk = health?.status === 'ok';
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  
   return (
-    <main className="p-6 max-w-6xl mx-auto">
-      <section className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8">
-        <h1 className="text-3xl font-semibold">Find jobs that match your profile</h1>
-        <p className="mt-2 text-blue-100">Connect your LinkedIn, set keywords, and swipe to apply.</p>
-        <div className="mt-4 flex items-center gap-3 text-sm">
-          <a href="/register" className="px-4 py-2 rounded bg-white text-blue-700 font-medium">Get started</a>
-          <a href="/profile" className="px-4 py-2 rounded border border-white/60">Set up profile</a>
-          <span className={`ml-auto inline-flex items-center gap-2 rounded-md px-3 py-1.5 ${isOk ? 'bg-white/20' : 'bg-red-600/70'}`}>
-            <span className={`inline-block h-2 w-2 rounded-full ${isOk ? 'bg-emerald-300' : 'bg-white'}`}></span>
-            <span className="text-xs">API: {isOk ? 'OK' : 'Down'}</span>
-          </span>
-        </div>
-      </section>
-      <div className="mt-8">
+    <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+      <HeroSection isApiOk={isOk} />
+      <div className="mt-6 sm:mt-8">
         <PublicJobs />
       </div>
-      <footer className="mt-12 border-t pt-6 text-sm text-gray-600">Made with Next.js & Express</footer>
+      <footer className="mt-8 sm:mt-12 border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6 text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">CareerPilot - Navigate your career with confidence</footer>
     </main>
   );
 }

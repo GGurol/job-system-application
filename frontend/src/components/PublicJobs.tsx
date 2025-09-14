@@ -29,18 +29,23 @@ export default function PublicJobs() {
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-xl font-semibold">Latest jobs</h2>
-        <button onClick={load} className="text-sm px-2 py-1 rounded bg-gray-200">Refresh</button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Latest jobs</h2>
+        <button 
+          onClick={load} 
+          className="text-sm px-3 py-1.5 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 font-medium self-start sm:self-auto"
+        >
+          Refresh
+        </button>
       </div>
-      {loading && <p>Loading jobs...</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {loading && <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Loading jobs...</p>}
+      {error && <p className="text-red-600 dark:text-red-400 text-sm sm:text-base">{error}</p>}
       {!loading && !error && (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {jobs.map(j => (
             <JobCard key={j.id} title={j.title} company={j.company} location={j.location} />
           ))}
-          {jobs.length === 0 && <p className="text-gray-600">No jobs available.</p>}
+          {jobs.length === 0 && <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base col-span-full">No jobs available.</p>}
         </div>
       )}
     </div>

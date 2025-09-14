@@ -135,7 +135,7 @@ export default function FileUpload({
   };
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-white/20 shadow-xl overflow-hidden">
+    <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/20 dark:border-gray-700/20 shadow-xl overflow-hidden">
       <div className="p-8">
         {/* Header */}
         <div className="flex items-center space-x-3 mb-6">
@@ -145,8 +145,8 @@ export default function FileUpload({
             </svg>
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">Upload Your Resume</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Upload Your Resume</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Upload your CV to enable automatic job applications ✨
             </p>
           </div>
@@ -156,10 +156,10 @@ export default function FileUpload({
         <div
           className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 transform ${
             dragActive
-              ? 'border-blue-400 bg-blue-50 scale-105 shadow-lg'
+              ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-950/50 scale-105 shadow-lg'
               : uploadedFile
-              ? 'border-green-400 bg-green-50'
-              : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 hover:scale-105'
+              ? 'border-green-400 dark:border-green-500 bg-green-50 dark:bg-green-950/50'
+              : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/50 hover:scale-105'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -190,10 +190,10 @@ export default function FileUpload({
                   </div>
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-blue-600">Uploading your resume...</p>
-                  <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+                  <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">Uploading your resume...</p>
+                  <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2 mt-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+                      className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300 ease-out"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
@@ -207,13 +207,13 @@ export default function FileUpload({
                   </svg>
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-green-600">Resume uploaded successfully! 🎉</p>
-                  <p className="text-sm text-gray-600 mt-1">{uploadedFile}</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">Resume uploaded successfully! 🎉</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{uploadedFile}</p>
                   <Button
                     onClick={resetUpload}
                     variant="outline"
                     size="sm"
-                    className="mt-3 border-green-300 text-green-600 hover:bg-green-50"
+                    className="mt-3 border-green-300 dark:border-green-600 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/50"
                   >
                     Upload Different File
                   </Button>
@@ -227,16 +227,16 @@ export default function FileUpload({
                   </svg>
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-gray-700">Drag & drop your resume here</p>
-                  <p className="text-sm text-gray-500">or click to browse files</p>
+                  <p className="text-lg font-semibold text-gray-700 dark:text-gray-300">Drag & drop your resume here</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">or click to browse files</p>
                   <div className="flex items-center justify-center space-x-2 mt-3">
                     {acceptedTypes.map((type, index) => (
-                      <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                      <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                         {type.toUpperCase()}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                     Maximum file size: {maxSize}MB
                   </p>
                 </div>
