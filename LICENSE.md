@@ -1,3 +1,5 @@
+Non-Commercial Modification License (NCM License)
+
 Copyright © 2025 Bartosz
 
 Permission is hereby granted to any person obtaining a copy of this work to use, modify, and distribute it, subject to the following conditions:
