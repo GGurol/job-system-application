@@ -1,10 +1,18 @@
 const { chromium } = require('playwright');
 const { Pool } = require('pg');
+
 class IndeedScraper {
   constructor() {
+    // ADDED: Log the DATABASE_URL to see what the script is receiving.
+    console.log("Scraper received DATABASE_URL:", process.env.DATABASE_URL);
+
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL environment variable is not set for the scraper.");
+    }
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
   }
-  async scrapeJobs(location='United States', keywords='software engineer', pages=1) {
+
+  async scrapeJobs(location = 'United States', keywords = 'software engineer', pages = 1) {
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({ userAgent: 'Mozilla/5.0' });
     const page = await context.newPage();
@@ -28,9 +36,14 @@ class IndeedScraper {
           source_id: job.url
         });
       }
-    } catch (e) { console.error('scrape err', e); }
-    finally { await browser.close(); }
+      console.log(`Scraped and saved ${jobs.length} jobs.`);
+    } catch (e) {
+      console.error('Scraping error:', e);
+    } finally {
+      await browser.close();
+    }
   }
+
   async saveJob(job) {
     try {
       await this.pool.query(
@@ -39,7 +52,10 @@ class IndeedScraper {
          ON CONFLICT (source, source_id) DO NOTHING`,
         [job.title, job.company, job.location, job.description, job.application_url, job.source, job.source_id]
       );
-    } catch(e){ console.error('save job err', e); }
+    } catch (e) {
+      console.error('Error saving job to DB:', e);
+    }
   }
 }
+
 module.exports = IndeedScraper;

@@ -77,9 +77,7 @@ See `.env.example` for required configuration values including:
 ## 🔧 Development
 
 ### Prerequisites
-- Node.js 18+
 - Docker & Docker Compose
-- PostgreSQL (if running locally)
 
 ### Local Development
 ```bash

@@ -24,8 +24,10 @@ import PublicJobs from '../components/PublicJobs';
 import HeroSection from '../components/HeroSection';
 
 export default async function Home() {
-  const [health] = await Promise.all([getHealth()]);
-  const isOk = health?.status === 'ok';
+  const health = await getHealth();
+  // CORRECTED: Check if the health object is not null,
+  // instead of checking for a specific string value.
+  const isOk = !!health;
   
   return (
     <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">

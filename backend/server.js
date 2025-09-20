@@ -8,27 +8,24 @@ const { Pool } = require('pg');
 const Queue = require('bull');
 const { spawn } = require('child_process');
 const cron = require('node-cron');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Database configuration with sensible local defaults
+// Database configuration with sensible defaults for Docker
 const DB_NAME = process.env.DB_NAME || 'job_app_db';
 const DB_USER = process.env.DB_USER || 'postgres';
 const DB_PASSWORD = process.env.DB_PASSWORD || 'Admin';
-const DB_HOST = process.env.DB_HOST || 'localhost';
+const DB_HOST = process.env.DB_HOST || 'db'; // Use the docker-compose service name
 const DB_PORT = Number(process.env.DB_PORT || 5432);
 
-// Will be assigned after initialization
 let pool;
 
-// Ensure database is initialized (idempotent)
-const fs = require('fs');
-const path = require('path');
 async function initializeDatabaseIfNeeded() {
   try {
-    // 1) Ensure target database exists by connecting to default "postgres" db
-    const adminConnStr = process.env.DATABASE_URL || `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/postgres`;
+    const adminConnStr = `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/postgres`;
     const adminPool = new Pool({ connectionString: adminConnStr });
     const result = await adminPool.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [DB_NAME]);
     if (result.rowCount === 0) {
@@ -37,16 +34,13 @@ async function initializeDatabaseIfNeeded() {
     }
     await adminPool.end();
 
-    // 2) Connect application pool to target database
     const appConnStr = process.env.DATABASE_URL || `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}`;
     pool = new Pool({ connectionString: appConnStr });
 
-    // 3) Run schema and seed
     const initPath = path.join(__dirname, '..', 'database', 'init.sql');
     if (fs.existsSync(initPath)) {
       const sql = fs.readFileSync(initPath, 'utf8');
       await pool.query(sql);
-      // Optional: also run seed if present
       const seedPath = path.join(__dirname, '..', 'scripts', 'seed-database.sql');
       if (fs.existsSync(seedPath)) {
         const seedSql = fs.readFileSync(seedPath, 'utf8');
@@ -58,24 +52,23 @@ async function initializeDatabaseIfNeeded() {
     throw e;
   }
 }
-// Start server immediately for development
-app.listen(PORT, () => { 
-  console.log(`Server running on port ${PORT}`);
-  // Try to initialize database in background
-  initializeDatabaseIfNeeded()
-    .then(() => console.log('Database initialized successfully'))
-    .catch((e) => console.log('Database initialization failed:', e.message));
-});
-// Disable Redis queue for now to avoid connection errors
+
 let applyQueue;
 try {
-  applyQueue = new Queue('auto-apply', process.env.REDIS_URL || 'redis://localhost:6379');
+  applyQueue = new Queue('auto-apply', process.env.REDIS_URL || 'redis://redis:6379');
 } catch(e) {
   console.log('Redis not available, auto-apply queue disabled');
   applyQueue = null;
 }
 
-app.use(cors());
+// --- CORRECTED CORS CONFIGURATION ---
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+};
+app.use(cors(corsOptions));
+// --- END OF CORRECTION ---
+
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
@@ -88,7 +81,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Health check (unauthenticated)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
@@ -104,7 +96,6 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Basic auth routes (register/login)
 app.post('/auth/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone, linkedinUrl } = req.body;
@@ -125,7 +116,6 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Profile endpoints
 app.get('/profile/me', authenticateToken, async (req, res) => {
   try {
     const userRes = await pool.query('SELECT id, email, first_name, last_name, phone, linkedin_url FROM users WHERE id = $1', [req.user.userId]);
@@ -142,7 +132,6 @@ app.post('/profile/me', authenticateToken, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Preferences endpoints
 app.post('/profile/preferences', authenticateToken, async (req, res) => {
   try {
     const { preferredCountries = [], preferredContractTypes = [], keywords = [], salaryMin = null, salaryMax = null } = req.body || {};
@@ -161,12 +150,10 @@ app.post('/profile/preferences', authenticateToken, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Matches endpoint using simple keyword match against title/description
 app.get('/jobs/matches', authenticateToken, async (req, res) => {
   try {
     const pref = await pool.query('SELECT keywords FROM user_preferences WHERE user_id = $1', [req.user.userId]);
     const keywords = (pref.rows[0]?.keywords || []).filter(Boolean);
-    // Fallback: if no keywords, return recent active
     if (keywords.length === 0) {
       const r = await pool.query('SELECT id, title, company, location, created_at FROM job_postings WHERE is_active = true ORDER BY created_at DESC LIMIT 20');
       return res.json(r.rows);
@@ -179,7 +166,6 @@ app.get('/jobs/matches', authenticateToken, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// Simple admin endpoints (protect with token; later add role-based if needed)
 app.post('/admin/scrape', authenticateToken, async (req, res) => {
   try {
     const keywords = req.body?.keywords || process.env.SCRAPE_KEYWORDS || 'software engineer';
@@ -217,7 +203,6 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// CV upload
 app.post('/cv/upload', authenticateToken, upload.single('cv'), async (req, res) => {
   try {
     const { makeActive } = req.body;
@@ -236,7 +221,6 @@ app.post('/cv/upload', authenticateToken, upload.single('cv'), async (req, res) 
   }
 });
 
-// Simple jobs list for swipe
 app.get('/jobs/list', authenticateToken, async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
@@ -248,7 +232,6 @@ app.get('/jobs/list', authenticateToken, async (req, res) => {
   }
 });
 
-// Public jobs list (unauthenticated, limited)
 app.get('/jobs/public-list', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 5, 20);
@@ -259,7 +242,6 @@ app.get('/jobs/public-list', async (req, res) => {
   }
 });
 
-// Dev-only: seed a few jobs quickly if none exist
 if (process.env.NODE_ENV !== 'production') {
   app.post('/dev/seed', async (req, res) => {
     try {
@@ -277,7 +259,6 @@ if (process.env.NODE_ENV !== 'production') {
     }
   });
 
-  // Trigger scraper run (keywords optional in body)
   app.post('/dev/scrape', async (req, res) => {
     try {
       const keywords = req.body?.keywords || 'software engineer';
@@ -295,7 +276,6 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Schedule scraping every 6 hours (can be adjusted via CRON_SCHEDULE)
 const schedule = process.env.CRON_SCHEDULE || '0 */6 * * *';
 try {
   cron.schedule(schedule, () => {
@@ -315,7 +295,6 @@ try {
   console.log('Scraper scheduler active:', schedule);
 } catch(e) { console.error('Failed to start scheduler', e.message); }
 
-// Record swipe
 app.post('/jobs/swipe', authenticateToken, async (req, res) => {
   try {
     const { jobId, action } = req.body;
@@ -344,4 +323,14 @@ app.get('/applications/status', authenticateToken, async (req, res) => {
   }
 });
 
-// moved listen above to wait for DB init
+initializeDatabaseIfNeeded()
+  .then(() => {
+    app.listen(PORT, () => { 
+      console.log(`Server running on port ${PORT}`);
+    });
+    console.log('Database initialized successfully');
+  })
+  .catch((e) => {
+    console.log('Server startup failed:', e.message);
+    process.exit(1);
+  });
