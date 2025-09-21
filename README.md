@@ -39,30 +39,32 @@
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd careerpilot
+   git clone https://github.com/GGurol/job-system-application.git
    ```
 
-2. **Configure environment variables**
+2. **Navigate to project directory**
    ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
+   cd job-system-application
    ```
 
-3. **Start the application**
+3. **Build and up the docker**
    ```bash
-   docker-compose up --build
+   docker compose up --build -d
    ```
 
-4. **Access the application**
+4. **Seed the database**
+   ```bash
+   docker compose exec -T db psql -U postgres -d jobapp < scripts/seed-database.sql
+   ```
+
+5. **Access the application**
    - Frontend: [http://localhost:3000](http://localhost:3000)
-   - Backend API: [http://localhost:3001](http://localhost:3001)
+   - Backend API: [http://localhost:3001/healty](http://localhost:3001/healty)
 
 ## 📋 Environment Variables
 
-See `.env.example` for required configuration values including:
+See `.env` for required configuration values including:
 - Database credentials (PostgreSQL)
-- API keys for job scraping
 - Service endpoints
 - Authentication secrets
 
@@ -74,23 +76,6 @@ See `.env.example` for required configuration values including:
 4. **Swipe Jobs** - Discover and apply to jobs with simple swipes
 5. **Track Progress** - Monitor your applications and success rates
 
-## 🔧 Development
-
-### Prerequisites
-- Docker & Docker Compose
-
-### Local Development
-```bash
-# Install dependencies
-npm run install:all
-
-# Start development servers
-npm run dev
-
-# Or start individual services
-npm run dev:frontend
-npm run dev:backend
-```
 
 ## 📱 Screenshots
 
@@ -100,18 +85,4 @@ npm run dev:backend
 - **Application Tracking** - Monitor all your job applications
 - **Dashboard** - Overview of your career journey
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the NCM License - see the LICENSE file for details.
-
-## 🆘 Support
-
-For support, email support@careerpilot.com or create an issue in the repository.
 

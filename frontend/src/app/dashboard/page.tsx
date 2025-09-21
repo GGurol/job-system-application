@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { getApiUrl } from '@/lib/utils';
 
 type Job = { id: number; title: string; company: string; location: string; created_at?: string };
 
@@ -12,7 +13,9 @@ export default function DashboardPage() {
     const fetchJobs = async () => {
       const token = localStorage.getItem('token');
       if (!token) { setError('Not authenticated'); setLoading(false); return; }
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
+      const baseUrl = getApiUrl();
+      
       try {
         const res = await fetch(`${baseUrl}/jobs/matches`, {
           headers: { Authorization: `Bearer ${token}` },

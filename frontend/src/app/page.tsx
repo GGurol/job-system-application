@@ -1,32 +1,25 @@
+import PublicJobs from '../components/PublicJobs';
+import HeroSection from '../components/HeroSection';
+import { getApiUrl } from '@/lib/utils';
+
+
 async function getHealth(): Promise<{ status: string } | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const baseUrl = getApiUrl();
   try {
     const res = await fetch(`${baseUrl}/health`, { cache: 'no-store' });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(`Health check failed with status: ${res.status}`);
+      return null;
+    }
     return res.json();
-  } catch {
+  } catch (error) {
+    console.error('Health check fetch failed:', error);
     return null;
   }
 }
 
-async function getPublicJobs(): Promise<{ id: number; title: string; company: string; location: string }[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-  try {
-    const res = await fetch(`${baseUrl}/jobs/public-list?limit=5`, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
-
-import PublicJobs from '../components/PublicJobs';
-import HeroSection from '../components/HeroSection';
-
 export default async function Home() {
   const health = await getHealth();
-  // CORRECTED: Check if the health object is not null,
-  // instead of checking for a specific string value.
   const isOk = !!health;
   
   return (
@@ -35,7 +28,9 @@ export default async function Home() {
       <div className="mt-6 sm:mt-8">
         <PublicJobs />
       </div>
-      <footer className="mt-8 sm:mt-12 border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6 text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">CareerPilot - Navigate your career with confidence</footer>
+      <footer className="mt-8 sm:mt-12 border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6 text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
+        CareerPilot - Navigate your career with confidence
+      </footer>
     </main>
   );
 }
