@@ -187,6 +187,29 @@ app.get('/admin/stats', authenticateToken, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ADDED: Endpoint to manually create a job posting
+app.post('/admin/jobs', authenticateToken, async (req, res) => {
+  try {
+    const { title, company, location, description, application_url } = req.body;
+    
+    // Basic validation
+    if (!title || !company) {
+      return res.status(400).json({ error: 'Title, Company, and Application URL are required.' });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO job_postings (title, company, location, description, application_url, source, is_active) 
+       VALUES ($1, $2, $3, $4, $5, 'manual', true) RETURNING id`,
+      [title, company, location, description, application_url]
+    );
+    
+    res.status(201).json({ id: result.rows[0].id, message: 'Job created successfully' });
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).json({ error: 'Failed to create job posting' });
+  }
+});
+
 app.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
