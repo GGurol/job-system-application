@@ -1,10 +1,12 @@
 .
 ├── backend
+│   ├── Dockerfile
 │   ├── middleware
 │   │   └── security.js
 │   ├── package.json
 │   ├── package-lock.json
-│   └── server.js
+│   ├── server.js
+│   └── uploads
 ├── bot
 │   ├── auto-apply-bot.js
 │   ├── bot-service.js
@@ -14,9 +16,11 @@
 ├── docker-compose.yml
 ├── frontend
 │   ├── components.json
+│   ├── Dockerfile
 │   ├── next.config.js
 │   ├── next-env.d.ts
 │   ├── package.json
+│   ├── package-lock.json
 │   ├── postcss.config.js
 │   ├── public
 │   │   ├── favicon.ico
@@ -49,7 +53,11 @@
 │   │   │   ├── PublicJobs.tsx
 │   │   │   └── ui
 │   │   │       ├── button.tsx
-│   │   │       └── card.tsx
+│   │   │       ├── card.tsx
+│   │   │       ├── dialog.tsx
+│   │   │       ├── input.tsx
+│   │   │       ├── label.tsx
+│   │   │       └── textarea.tsx
 │   │   └── lib
 │   │       ├── config.ts
 │   │       └── utils.ts
@@ -90,4 +98,4 @@
 │   └── setup.sh
 └── tree.txt
 
-29 directories, 62 files
+30 directories, 69 files
